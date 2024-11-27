@@ -6,11 +6,10 @@ import (
 
 type User struct {
 	ID           uint   `gorm:"primary_key"`
-	Name         string `json:"name" gorm:"not null"`
-	Email        string `json:"email" gorm:"unique;not null"`
-	PasswordHash string `json:"passwordhash" gorm:"not null"`
-	Age          uint
-	UserImageUrl string `json:"userimageurl"`
+	Name         string `gorm:"not null"`
+	Email        string `gorm:"unique;not null"`
+	PasswordHash string `gorm:"not null"`
+	UserImageUrl string
 	CreatedAt    time.Time
 	UpdatedAt    time.Time
 }

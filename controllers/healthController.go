@@ -1,4 +1,4 @@
-package routes
+package controllers
 
 import (
 	"net/http"
@@ -6,7 +6,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func statusCheck(ctx *gin.Context) {
+func StatusCheck(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, gin.H{
 		"Health" : "All Systems are up and Running",
 	})
