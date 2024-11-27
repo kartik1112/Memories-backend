@@ -8,6 +8,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/kartik1112/Memories-backend/initializers"
 	"github.com/kartik1112/Memories-backend/models"
+	"github.com/kartik1112/Memories-backend/utils"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -80,7 +81,7 @@ func Login(ctx *gin.Context) {
 
 	if result.Error != nil {
 		ctx.JSON(http.StatusUnauthorized, gin.H{
-			"error": "Invalid email or password",
+			"error": "Invalid email",
 		})
 		return
 	}
@@ -94,8 +95,17 @@ func Login(ctx *gin.Context) {
 		return
 	}
 
+	token, err := utils.GenerateJWT(user)
+
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{
+			"message": "Server Error",
+		})
+		return
+	}
+
 	ctx.JSON(http.StatusOK, gin.H{
 		"message": "Login Success!",
-		"token":   "snfn",
+		"token":   token,
 	})
 }
