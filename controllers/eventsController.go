@@ -6,6 +6,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/kartik1112/Memories-backend/initializers"
 	"github.com/kartik1112/Memories-backend/models"
+	"github.com/kartik1112/Memories-backend/utils"
 )
 
 func CreateEvent(ctx *gin.Context) {
@@ -27,7 +28,7 @@ func CreateEvent(ctx *gin.Context) {
 		})
 	}
 
-	event.Code = "KASKWA"
+	event.Code = utils.GenerateEventCode(userId.(uint), event.EventName)
 	event.CreatedBy = userId.(uint)
 
 	result := initializers.DB.Create(&event)
@@ -40,7 +41,7 @@ func CreateEvent(ctx *gin.Context) {
 	}
 
 	ctx.JSON(http.StatusOK, gin.H{
-		"message":       "Event Created Successfully",
-		"rows affected": result,
+		"message":   "Event Created Successfully",
+		"eventCode": event.Code,
 	})
 }
