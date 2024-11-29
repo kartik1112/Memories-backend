@@ -13,6 +13,7 @@ func RegisterRoutes(server *gin.Engine) {
 
 	protected := server.Group("/")
 	protected.Use(middlewares.CheckAuthentication)
-	protected.POST("/event", controllers.CreateEvent)
+	protected.POST("/event/create", controllers.CreateEvent)
 	protected.POST("/events/join", controllers.JoinEvent)
+	protected.GET("/events/fetch/", controllers.FetchEvents)
 }

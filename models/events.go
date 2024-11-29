@@ -16,15 +16,15 @@ type Event struct {
 	CreatedBy uint      `gorm:"not null"`
 	CreatedAt time.Time `gorm:"autoCreateTime"`
 
-	User User `gorm:"foreignKey:CreatedBy;constraint:onDelete:cascade"`
+	User User `gorm:"foreignKey:CreatedBy;constraint:onDelete:cascade" `
 }
 
-func (e *Event) CreateEvent() (error){
-	e.Code = utils.GenerateEventCode(e.CreatedBy,e.EventName)
+func (e *Event) CreateEvent() error {
+	e.Code = utils.GenerateEventCode(e.CreatedBy, e.EventName)
 
 	result := initializers.DB.Create(&e)
 
-	if result.Error!=nil {
+	if result.Error != nil {
 		return result.Error
 	}
 
@@ -38,4 +38,24 @@ func (e *Event) GetEventFromCode() (*Event, error) {
 		return nil, errors.New("Event Not Found with code" + e.Code)
 	}
 	return e, nil
+}
+
+func GetEventsCreatedByUserId(userId uint) ([]*Event, error) {
+	var events []*Event
+	result := initializers.DB.Preload("User").Where("created_by = ?", userId).Find(&events)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+	return events, nil
+}
+
+func GetEventsJoinedByUserId(userId uint) ([]*Event, error) {
+	var events []*Event
+	result := initializers.DB.Joins("JOIN user_events ON user_events.event_id=events.id").Where("user_events.user_id = ?", userId).Find(&events)
+
+	if result.Error != nil {
+		return nil, result.Error
+	}
+
+	return events, nil
 }

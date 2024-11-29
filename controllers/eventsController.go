@@ -42,3 +42,38 @@ func CreateEvent(ctx *gin.Context) {
 		"eventCode": event.Code,
 	})
 }
+
+func FetchEvents(ctx *gin.Context) {
+
+	userId, ok := ctx.Get("userId")
+
+	if !ok {
+		ctx.JSON(http.StatusUnauthorized, gin.H{
+			"message": "Unauthorized Access",
+		})
+		return
+	}
+
+	eventsCreated, err := models.GetEventsCreatedByUserId(userId.(uint))
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{
+			"message": "Could Not Fetch Events",
+		})
+		return
+	}
+
+	eventsJoined, err := models.GetEventsJoinedByUserId(userId.(uint))
+
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{
+			"message": "Could Not Fetch Events",
+		})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, gin.H{
+		"created_events": eventsCreated,
+		"joined_events":  eventsJoined,
+	})
+
+}
