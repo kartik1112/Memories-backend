@@ -15,5 +15,5 @@ func RegisterRoutes(server *gin.Engine) {
 	protected.Use(middlewares.CheckAuthentication)
 	protected.POST("/event/create", controllers.CreateEvent)
 	protected.POST("/events/join", controllers.JoinEvent)
-	protected.GET("/events/fetch/", controllers.FetchEvents)
+	protected.GET("/events/fetch", controllers.FetchEvents)
 }
