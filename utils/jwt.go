@@ -6,18 +6,17 @@ import (
 	"os"
 
 	"github.com/golang-jwt/jwt/v5"
-	"github.com/kartik1112/Memories-backend/models"
 )
 
 var secretKey = []byte(os.Getenv("JWT_SECRET"))
 
-func GenerateJWT(user models.User) (string, error) {
+func GenerateJWT(userId uint, name string, email string) (string, error) {
 
 	fmt.Print(string(secretKey))
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"userId": user.UserId,
-		"name":   user.Name,
-		"email":  user.Email,
+		"userId": userId,
+		"name":   name,
+		"email":  email,
 	})
 
 	tokenString, err := token.SignedString(secretKey)

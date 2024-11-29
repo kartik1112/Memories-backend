@@ -14,4 +14,5 @@ func RegisterRoutes(server *gin.Engine) {
 	protected := server.Group("/")
 	protected.Use(middlewares.CheckAuthentication)
 	protected.POST("/event", controllers.CreateEvent)
+	protected.POST("/events/join", controllers.JoinEvent)
 }

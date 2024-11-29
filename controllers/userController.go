@@ -1,34 +1,18 @@
 package controllers
 
 import (
-	"fmt"
-	"log"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/kartik1112/Memories-backend/initializers"
 	"github.com/kartik1112/Memories-backend/models"
 	"github.com/kartik1112/Memories-backend/utils"
-	"golang.org/x/crypto/bcrypt"
 )
-
-type SignupBody struct {
-	Name         string `json:"name"`
-	Email        string `json:"email"`
-	Password     string `json:"password"`
-	UserImageUrl string `json:"userimageurl"`
-}
-
-type LoginBody struct {
-	Email    string `json:"email"`
-	Password string `json:"password"`
-}
 
 func Signup(ctx *gin.Context) {
 
-	var body SignupBody
+	var user models.User
 
-	err := ctx.ShouldBindJSON(&body)
+	err := ctx.ShouldBindJSON(&user)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{
 			"error": "Invalid JSON provided",
@@ -36,40 +20,34 @@ func Signup(ctx *gin.Context) {
 		return
 	}
 
-	hash, err := bcrypt.GenerateFromPassword([]byte(body.Password), 10)
+	hash, err := utils.GenerateHashedPassword(user.Password)
+
 	if err != nil {
-		log.Fatal("Can not Generate Hash : ", err)
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"message": "Password Hashing Error",
+		})
 		return
 	}
+	user.Password = hash
+	err = user.CreateUser()
 
-	result := initializers.DB.Create(&models.User{
-		Email:        body.Email,
-		PasswordHash: string(hash),
-		Name:         body.Name,
-		UserImageUrl: body.UserImageUrl,
-	})
-
-	if result.Error != nil {
+	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{
-			"message": "User Already Exist.",
+			"message": err,
 		})
 		return
 	}
 
 	ctx.JSON(http.StatusOK, gin.H{
 		"message": "Successfully Signed Up.",
-		"created": result.RowsAffected,
 	})
-
 }
 
 func Login(ctx *gin.Context) {
 
 	var user models.User
-	var body LoginBody
 
-	err := ctx.ShouldBindJSON(&body)
-	fmt.Print(body.Password)
+	err := ctx.ShouldBindJSON(&user)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{
 			"error": "Invalid JSON provided",
@@ -77,25 +55,26 @@ func Login(ctx *gin.Context) {
 		return
 	}
 
-	result := initializers.DB.Where("email = ?", body.Email).First(&user)
+	userPassword := user.Password
 
-	if result.Error != nil {
+	err = user.GetUserByEmail()
+	if err != nil {
 		ctx.JSON(http.StatusUnauthorized, gin.H{
 			"error": "Invalid email",
 		})
 		return
 	}
 
-	err = bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(body.Password))
+	ok := utils.CheckPasswordAndHash(user.Password, userPassword)
 
-	if err != nil {
+	if !ok {
 		ctx.JSON(http.StatusUnauthorized, gin.H{
 			"message": "Logged In Failed : Incorrect Password!",
 		})
 		return
 	}
 
-	token, err := utils.GenerateJWT(user)
+	token, err := utils.GenerateJWT(user.ID, user.Name, user.Email)
 
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{

@@ -2,6 +2,7 @@ package main
 
 import (
 	"log"
+
 	"github.com/gin-gonic/gin"
 	"github.com/kartik1112/Memories-backend/initializers"
 	"github.com/kartik1112/Memories-backend/models"
@@ -11,7 +12,7 @@ import (
 func init() {
 	initializers.LoadEnvVariables()
 	initializers.ConnectToDB()
-	err := initializers.DB.AutoMigrate(models.User{}, models.Events{})
+	err := initializers.DB.AutoMigrate(models.User{}, models.Event{}, models.UserEvent{})
 	if err != nil {
 		log.Fatal(err)
 	}
