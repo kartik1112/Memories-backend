@@ -39,6 +39,5 @@ jobs:
         push: true
         tags: |
           kartik1112/memories-backend:latest
-          kartik1112/memories-backend:db
 
 
